@@ -1,14 +1,24 @@
-sealed trait Controller
+sealed trait Controller {
+  def parseToIntList(data: List[String]): List[Int] = {
+    // Parse each line of data to integers
+    data.flatMap(line => line.split("\\s+").map(_.toIntOption).collect { case Some(value) => value })
+  }
+
+  def parseToDoubleList(data: List[String]): List[Double] = {
+    // Parse each line of data to doubles
+    data.flatMap(line => line.split("\\s+").map(_.toDoubleOption).collect { case Some(value) => value })
+  }
+}
 case class WindTurbineController(
                                  speedSensor: Sensor,
                                  dirSensor: Sensor,
                                  tempSensor: Sensor,
                                  powerCurve: Map[Int, Int],
                                  orientation: Int) extends Controller {
-  def command(date: String): String = {
-    val speed = speedSensor.parseToIntList(speedSensor.getData()).last
-    val dir = dirSensor.parseToIntList(dirSensor.getData()).last
-    val temp = tempSensor.parseToIntList(tempSensor.getData()).last
+  def command(): String = {
+    val speed = parseToIntList(speedSensor.getData).last
+    val dir = parseToIntList(dirSensor.getData).last
+    val temp = parseToIntList(tempSensor.getData).last
     if(speed < powerCurve.keysIterator.min || speed > powerCurve.keysIterator.max) {
       // outside of wind speed operating range
       return "Off"
@@ -29,9 +39,9 @@ case class SolarPanelController(
                                tempSensor: Sensor,
                                power: Int
                                ) extends Controller {
-  def command(date: String): String = {
-    val brightness = lightSensor.parseToIntList(lightSensor.getData()).last
-    val temperature = tempSensor.parseToIntList(tempSensor.getData()).last
+  def command(): String = {
+    val brightness = parseToIntList(lightSensor.getData).last
+    val temperature = parseToIntList(tempSensor.getData).last
     if(temperature < -40 || temperature > 65) {
       return "Off"
     }
@@ -46,9 +56,9 @@ case class HydropowerController(
                                flowSensor: Sensor,
                                power: Int
                                ) extends Controller {
-  def command(date: String): String = {
-    val flow = flowSensor.parseToIntList(flowSensor.getData()).last
-    val reserves = damSensor.parseToIntList(damSensor.getData()).last
+  def command(): String = {
+    val flow = parseToIntList(flowSensor.getData).last
+    val reserves = parseToDoubleList(damSensor.getData).last
     if(reserves < 0.3 && flow > 14) {
       // if dam has too little water
       return "Close dam"
@@ -75,7 +85,7 @@ case class None()
 
 
 class Sensor(filePath: String) {
-  def getData(): List[String] = {
+  def getData: List[String] = {
     // Read data from the file
     try {
       val source = Source.fromFile(filePath)
@@ -89,27 +99,6 @@ class Sensor(filePath: String) {
     }
   }
 
-  def parseToIntList(data: List[String]): List[Int] = {
-    // Parse each line of data to integers
-    data.flatMap(line => line.split("\\s+").map(_.toIntOption).collect { case Some(value) => value })
-  }
-
-  def parseToDoubleList(data: List[String]): List[Double] = {
-    // Parse each line of data to doubles
-    data.flatMap(line => line.split("\\s+").map(_.toDoubleOption).collect { case Some(value) => value })
-  }
-
-  def listDay(date: String): List[Any] = {
-    // Read data for a specific date (placeholder implementation)
-    val data = getData()
-    parseToDoubleList(data) // Modify based on the type of data expected
-  }
-
-  def listAll(): List[Any] = {
-    // Read all data (placeholder implementation)
-    val data = getData()
-    parseToIntList(data) // Modify based on the type of data expected
-  }
 }
 
 
@@ -119,16 +108,16 @@ case class Modifier(windTurbineController: WindTurbineController,
                     hydropowerController: HydropowerController) {
 
   def adjustControllers(date: String): Unit = {
-    val windTurbineCommand = windTurbineController.command(date)
-    val solarPanelCommand = solarPanelController.command(date)
-    val hydropowerCommand = hydropowerController.command(date)
+    val windTurbineCommand = windTurbineController.command()
+    val solarPanelCommand = solarPanelController.command()
+    val hydropowerCommand = hydropowerController.command()
 
     // Based on the commands from each controller, perform adjustments or actions
     // For example:
     if (windTurbineCommand == "On") {
-      println("Wind turbine is turned on.")
+      println("Wind turbine is turned on.") // side effect, printing to console
       // Perform actions for wind turbine operation
-      val windSpeed = windTurbineController.speedSensor.getData().last
+      val windSpeed = windTurbineController.speedSensor.getData.last
       println(s"Current wind speed: $windSpeed")
     } else {
       println("Wind turbine is turned off.")
@@ -138,7 +127,7 @@ case class Modifier(windTurbineController: WindTurbineController,
     if (solarPanelCommand == "On") {
       println("Solar panels are facing the sun.")
       // Perform actions for solar panel operation
-      val brightness = solarPanelController.lightSensor.getData().last
+      val brightness = solarPanelController.lightSensor.getData.last
       println(s"Current brightness: $brightness")
     } else {
       println("Solar panels are not facing the sun.")
@@ -148,8 +137,8 @@ case class Modifier(windTurbineController: WindTurbineController,
     if (hydropowerCommand == "Open dam") {
       println("Dam is open for hydropower generation.")
       // Perform actions for hydropower operation when dam is open
-      val flow = hydropowerController.flowSensor.getData().last
-      val reserves = hydropowerController.damSensor.getData().last
+      val flow = hydropowerController.flowSensor.getData.last
+      val reserves = hydropowerController.damSensor.getData.last
       println(s"Current flow rate: $flow, Reserves: $reserves")
     } else {
       println("Dam is closed.")
