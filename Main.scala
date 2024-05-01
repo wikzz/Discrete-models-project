@@ -191,3 +191,90 @@ case class  WaterFlowSensor() {
     listDay("")
   }
 }
+
+//Sensors:
+import scala.io.Source
+
+class Sensor(filePath: String) {
+  def getData(): List[String] = {
+    // Read data from the file
+    try {
+      val source = Source.fromFile(filePath)
+      val data = source.getLines().toList
+      source.close()
+      data
+    } catch {
+      case e: Exception =>
+        println(s"Error reading data from file: ${e.getMessage}")
+        List.empty[String]
+    }
+  }
+
+  def parseToIntList(data: List[String]): List[Int] = {
+    // Parse each line of data to integers
+    data.flatMap(line => line.split("\\s+").map(_.toIntOption).collect { case Some(value) => value })
+  }
+
+  def parseToDoubleList(data: List[String]): List[Double] = {
+    // Parse each line of data to doubles
+    data.flatMap(line => line.split("\\s+").map(_.toDoubleOption).collect { case Some(value) => value })
+  }
+
+  def listDay(date: String): List[Any] = {
+    // Read data for a specific date (placeholder implementation)
+    val data = getData()
+    parseToDoubleList(data) // Modify based on the type of data expected
+  }
+
+  def listAll(): List[Any] = {
+    // Read all data (placeholder implementation)
+    val data = getData()
+    parseToIntList(data) // Modify based on the type of data expected
+  }
+}
+
+
+//Modifier
+case class Modifier(windTurbineController: WindTurbineController,
+                    solarPanelController: SolarPanelController,
+                    hydropowerController: HydropowerController) {
+  
+  def adjustControllers(date: String): Unit = {
+    val windTurbineCommand = windTurbineController.command(date)
+    val solarPanelCommand = solarPanelController.command(date)
+    val hydropowerCommand = hydropowerController.command(date)
+    
+    // Based on the commands from each controller, perform adjustments or actions
+    // For example:
+    if (windTurbineCommand == "On") {
+      println("Wind turbine is turned on.")
+      // Perform actions for wind turbine operation
+      val windSpeed = windTurbineController.speedSensor.getWindSpeed(date)
+      println(s"Current wind speed: $windSpeed")
+    } else {
+      println("Wind turbine is turned off.")
+      // Perform actions when wind turbine is off
+    }
+    
+    if (solarPanelCommand == "On") {
+      println("Solar panels are facing the sun.")
+      // Perform actions for solar panel operation
+      val brightness = solarPanelController.lightSensor.getBrightness(date)
+      println(s"Current brightness: $brightness")
+    } else {
+      println("Solar panels are not facing the sun.")
+      // Perform actions when solar panels are off
+    }
+    
+    if (hydropowerCommand == "Open dam") {
+      println("Dam is open for hydropower generation.")
+      // Perform actions for hydropower operation when dam is open
+      val flow = hydropowerController.flowSensor.getFlow(date)
+      val reserves = hydropowerController.damSensor.getReserves(date)
+      println(s"Current flow rate: $flow, Reserves: $reserves")
+    } else {
+      println("Dam is closed.")
+      // Perform actions for hydropower operation when dam is closed
+    }
+  }
+}
