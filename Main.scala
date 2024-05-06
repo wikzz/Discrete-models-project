@@ -146,9 +146,15 @@ object Main {
     println("Initializing controllers...")
 
     // Create instances of the sensors
-    val speedSensor = new Sensor("Wind speed.txt")
-    val dirSensor = new Sensor("Wind direction.txt")
-    val tempSensor = new Sensor("Temperature.txt")
+    println("Please enter the file path of the speed sensor data: (e.g. /Users/david/Downloads/Wind_speed.txt)")
+    val speedFilePath = scala.io.StdIn.readLine()
+    println("Please enter the file path of the wind direction sensor data: (e.g. /Users/david/Downloads/Wind_direction.txt)")
+    val dirFilePath = scala.io.StdIn.readLine()
+    println("Please enter the file path of the temperature sensor data: (e.g. /Users/david/Downloads/Temperature.txt)")
+    val temperatureFilePath = scala.io.StdIn.readLine()
+    val speedSensor = new Sensor(speedFilePath)
+    val dirSensor = new Sensor(dirFilePath)
+    val tempSensor = new Sensor(temperatureFilePath)
 
     // Create instance of WindTurbineController
     val windTurbineController = WindTurbineController(
