@@ -189,3 +189,9 @@ case class Modifier(windTurbineController: WindTurbineController,
     }
   }
 }
+
+object Main {
+  def main(args: Array[String]): Unit = {
+    println("ok")
+  }
+}
