@@ -4,7 +4,6 @@ sealed trait SensorResult
 case class SensorData(data: List[String]) extends SensorResult
 case class SensorError(message: String) extends SensorResult
 
-
 sealed trait Controller {
   def parseToIntList(data: List[String]): List[Int] = {
     // Parse each line of data to integers
@@ -79,18 +78,6 @@ case class HydropowerController(
   }
 }
 
-
-//Sensors:
-import scala.io.Source
-
-//  replace try{}catch{} with sealed trait implementation
-sealed trait Option
-case class StringList(list: List[String])
-case class None()
-
-//  parse csv file, only get interesting column
-
-
 import scala.io.Source
 
 class Sensor(filePath: String) {
@@ -108,44 +95,6 @@ class Sensor(filePath: String) {
     }
   }
 }
-
-// Create instances of the Sensor class for each sensor
-val windDirectionSensor = new Sensor("Wind direction.txt")
-val windSpeedSensor = new Sensor("Wind speed.txt")
-val temperatureSensor = new Sensor("Temperature.txt")
-
-// Define the WindTurbineController using the sensors
-val windTurbineController = WindTurbineController(
-  speedSensor = windSpeedSensor,
-  dirSensor = windDirectionSensor,
-  tempSensor = temperatureSensor,
-  powerCurve = Map(
-    1 -> 100,
-    2 -> 200,
-    3 -> 300,
-    4 -> 400,
-    5 -> 500,
-    6 -> 600
-  ),
-  orientation = 180
-)
-
-
-// Define other controllers using the sensors similarly
-val solarPanelController = SolarPanelController(
-  lightSensor = ???, // Replace ??? with the appropriate sensor
-  tempSensor = ???, // Replace ??? with the appropriate sensor
-  power = ??? // Provide the power value
-)
-
-val hydropowerController = HydropowerController(
-  damSensor = ???, // Replace ??? with the appropriate sensor
-  flowSensor = ???, // Replace ??? with the appropriate sensor
-  power = ??? // Provide the power value
-)
-
-
-
 
 //Modifier
 case class Modifier(windTurbineController: WindTurbineController,
@@ -195,5 +144,22 @@ case class Modifier(windTurbineController: WindTurbineController,
 object Main {
   def main(args: Array[String]): Unit = {
     println("ok")
+
+    // Define the WindTurbineController using the sensors
+    val windTurbineController = new WindTurbineController(
+      speedSensor = new Sensor("Wind direction.txt"),
+      dirSensor = new Sensor("Wind speed.txt"),
+      tempSensor = new Sensor("Temperature.txt"),
+      powerCurve = Map(
+        1 -> 100,
+        2 -> 200,
+        3 -> 300,
+        4 -> 400,
+        5 -> 500,
+        6 -> 600
+      ),
+      orientation = 180
+    )
+
   }
 }
