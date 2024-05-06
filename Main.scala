@@ -1,3 +1,10 @@
+import scala.io.Source
+
+sealed trait SensorResult
+case class SensorData(data: List[String]) extends SensorResult
+case class SensorError(message: String) extends SensorResult
+
+
 sealed trait Controller {
   def parseToIntList(data: List[String]): List[Int] = {
     // Parse each line of data to integers
@@ -10,11 +17,11 @@ sealed trait Controller {
   }
 }
 case class WindTurbineController(
-                                 speedSensor: Sensor,
-                                 dirSensor: Sensor,
-                                 tempSensor: Sensor,
-                                 powerCurve: Map[Int, Int],
-                                 orientation: Int) extends Controller {
+                                  speedSensor: Sensor,
+                                  dirSensor: Sensor,
+                                  tempSensor: Sensor,
+                                  powerCurve: Map[Int, Int],
+                                  orientation: Int) extends Controller {
   def command(): String = {
     val speed = parseToIntList(speedSensor.getData).last
     val dir = parseToIntList(dirSensor.getData).last
@@ -35,9 +42,9 @@ case class WindTurbineController(
   }
 }
 case class SolarPanelController(
-                               lightSensor: Sensor,
-                               tempSensor: Sensor,
-                               power: Int
+                                 lightSensor: Sensor,
+                                 tempSensor: Sensor,
+                                 power: Int
                                ) extends Controller {
   def command(): String = {
     val brightness = parseToIntList(lightSensor.getData).last
@@ -52,9 +59,9 @@ case class SolarPanelController(
   }
 }
 case class HydropowerController(
-                               damSensor: Sensor,
-                               flowSensor: Sensor,
-                               power: Int
+                                 damSensor: Sensor,
+                                 flowSensor: Sensor,
+                                 power: Int
                                ) extends Controller {
   def command(): String = {
     val flow = parseToIntList(flowSensor.getData).last
@@ -94,12 +101,48 @@ class Sensor(filePath: String) {
       data
     } catch {
       case e: Exception =>
-        println(s"Error reading data from file: ${e.getMessage}") // side effect
+        // Return an empty list if an exception occurs
         List.empty[String]
     }
   }
-
 }
+
+// Create instances of the Sensor class for each sensor
+
+val windDirectionSensor = new Sensor("Wind direction.txt")
+val windSpeedSensor = new Sensor("Wind speed.txt")
+val temperatureSensor = new Sensor("Temperature.txt")
+
+// Define the WindTurbineController using the sensors
+val windTurbineController = WindTurbineController(
+  speedSensor = windSpeedSensor,
+  dirSensor = windDirectionSensor,
+  tempSensor = temperatureSensor,
+  powerCurve = Map(
+    1 -> 100,
+    2 -> 200,
+    3 -> 300,
+    4 -> 400,
+    5 -> 500,
+    6 -> 600
+  ),
+  orientation = 180
+)
+
+// Define other controllers using the sensors similarly
+val solarPanelController = SolarPanelController(
+  lightSensor = ???, // Replace ??? with the appropriate sensor
+  tempSensor = ???, // Replace ??? with the appropriate sensor
+  power = ??? // Provide the power value
+)
+
+val hydropowerController = HydropowerController(
+  damSensor = ???, // Replace ??? with the appropriate sensor
+  flowSensor = ???, // Replace ??? with the appropriate sensor
+  power = ??? // Provide the power value
+)
+
+
 
 
 //Modifier
