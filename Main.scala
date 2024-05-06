@@ -143,13 +143,18 @@ case class Modifier(windTurbineController: WindTurbineController,
 
 object Main {
   def main(args: Array[String]): Unit = {
-    println("ok")
+    println("Initializing controllers...")
 
-    // Define the WindTurbineController using the sensors
-    val windTurbineController = new WindTurbineController(
-      speedSensor = new Sensor("Wind direction.txt"),
-      dirSensor = new Sensor("Wind speed.txt"),
-      tempSensor = new Sensor("Temperature.txt"),
+    // Create instances of the sensors
+    val speedSensor = new Sensor("Wind speed.txt")
+    val dirSensor = new Sensor("Wind direction.txt")
+    val tempSensor = new Sensor("Temperature.txt")
+
+    // Create instance of WindTurbineController
+    val windTurbineController = WindTurbineController(
+      speedSensor = speedSensor,
+      dirSensor = dirSensor,
+      tempSensor = tempSensor,
       powerCurve = Map(
         1 -> 100,
         2 -> 200,
@@ -160,6 +165,8 @@ object Main {
       ),
       orientation = 180
     )
-
+    // Print information about the wind turbine controller
+    println("Wind Turbine Controller Information:")
+    println(s"Current command: ${windTurbineController.command()}")
   }
 }
