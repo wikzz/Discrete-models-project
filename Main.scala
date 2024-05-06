@@ -101,7 +101,7 @@ case class Modifier(windTurbineController: WindTurbineController,
                     solarPanelController: SolarPanelController,
                     hydropowerController: HydropowerController) {
 
-  def adjustControllers(date: String): Unit = {
+  def adjustControllers(): Unit = {
     val windTurbineCommand = windTurbineController.command()
     val solarPanelCommand = solarPanelController.command()
     val hydropowerCommand = hydropowerController.command()
@@ -171,8 +171,23 @@ object Main {
       ),
       orientation = 180
     )
+    val solarPanelController = new SolarPanelController(
+      lightSensor = dirSensor,
+      tempSensor = tempSensor,
+      power = 9000
+    )
+    val hydropowerController = new HydropowerController(
+      damSensor = dirSensor,
+      flowSensor = speedSensor,
+      power = 20000
+    )
+    val modifier = new Modifier(
+      windTurbineController = windTurbineController,
+      solarPanelController = solarPanelController,
+      hydropowerController = hydropowerController
+    )
     // Print information about the wind turbine controller
     println("Wind Turbine Controller Information:")
-    println(s"Current command: ${windTurbineController.command()}")
+    modifier.adjustControllers()
   }
 }
