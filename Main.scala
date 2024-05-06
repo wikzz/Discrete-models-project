@@ -91,6 +91,8 @@ case class None()
 //  parse csv file, only get interesting column
 
 
+import scala.io.Source
+
 class Sensor(filePath: String) {
   def getData: List[String] = {
     // Read data from the file
@@ -108,7 +110,6 @@ class Sensor(filePath: String) {
 }
 
 // Create instances of the Sensor class for each sensor
-
 val windDirectionSensor = new Sensor("Wind direction.txt")
 val windSpeedSensor = new Sensor("Wind speed.txt")
 val temperatureSensor = new Sensor("Temperature.txt")
@@ -128,6 +129,7 @@ val windTurbineController = WindTurbineController(
   ),
   orientation = 180
 )
+
 
 // Define other controllers using the sensors similarly
 val solarPanelController = SolarPanelController(
